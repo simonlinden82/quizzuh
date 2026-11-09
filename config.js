@@ -2,7 +2,7 @@
 window.QUIZ = {
   // Fill in after creating the Spotify app at developer.spotify.com (see README).
   // Empty = test mode without music.
-  spotifyClientId: "",
+  spotifyClientId: "96f2aabb23fd4cbdb0370ead6a1058ae",
 
   songsPerGame: 20,     // default on the start screen
   secondsPerSong: 45,   // default on the start screen
