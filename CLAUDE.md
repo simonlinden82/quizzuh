@@ -23,3 +23,14 @@ do the git steps for him, never ask him to use the terminal.
 - Updating: read the playlist from the embed page (`tools/spotify_tracks.py`), check only new songs
   (`tools/musicbrainz_years.py`, then by hand with Wikipedia), keep Simon's earlier decisions,
   rebuild the sheet with `tools/make_sheet.py`. Needs network access to open.spotify.com, musicbrainz.org, en.wikipedia.org.
+
+## Code (plain HTML + JavaScript, no build step)
+- `index.html` = the hub (QR code, songs, scores), `play.html` = the phone page. Swedish texts.
+- `config.js` = the numbers to tweak (points, songs per game, seconds, match strictness) and the Spotify Client ID.
+- `js/common.js` = answer matching (`artistOk` / `titleOk`, spelling-tolerant), `placementOk`.
+- `js/hub.js` holds the whole game (`G`, saved in localStorage so a reload can continue); phones send `join` / `answer`,
+  the hub sends each phone its own `state` view. Connections: PeerJS (WebRTC, `vendor/peerjs.min.js`), public PeerJS
+  server by default; `?peer=127.0.0.1:9000` uses a local test server.
+- `js/spotify.js` = Spotify login (PKCE, no secret) + play on a chosen device (needs Premium).
+- `data/songs.js` is made from `data/songs.json` by `tools/make_songs_js.py`: re-run it after changing the list.
+- Testing: silent (headless, `--mute-audio`). Local PeerJS server: `require("peer").PeerServer({port: 9000, path: "/", host: "127.0.0.1"})`.
