@@ -6,7 +6,8 @@ let G = null;          // the game
 let peer = null;
 const conns = {};      // player id -> connection
 let tick = null;
-let ui = { songs: QUIZ.songsPerGame, secs: QUIZ.secondsPerSong, device: localStorage.getItem("quizzuh-device") || "", devices: [], msg: "" };
+let ui = { songs: QUIZ.songsPerGame, secs: QUIZ.secondsPerSong, device: localStorage.getItem("quizzuh-device") || "", devices: [], msg: "",
+           mode: localStorage.getItem("quizzuh-mode") || "random", pad: "" };
 
 const usable = () => SONGS.filter(s => s.year);
 const yearsAvailable = () => new Set(usable().map(s => s.year)).size;
@@ -27,9 +28,10 @@ function newCode() {
 }
 
 function newGame() {
-  const n = Math.max(2, Math.min(Number(ui.songs) || 20, yearsAvailable()));
-  G = { code: newCode(), phase: "lobby", songs: pickSongs(n), round: -1, secs: Number(ui.secs) || 45,
-        players: {}, order: [], startedAt: Date.now() };
+  const cards = ui.mode === "cards";
+  const n = Math.max(2, Math.min(Number(ui.songs) || 20, cards ? usable().length : yearsAvailable()));
+  G = { code: newCode(), mode: cards ? "cards" : "random", phase: "lobby", songs: cards ? [] : pickSongs(n), rounds: n,
+        round: -1, secs: Number(ui.secs) || 45, players: {}, order: [], startedAt: Date.now() };
   save(); connect(); render();
 }
 
@@ -38,7 +40,31 @@ const song = () => G.songs[G.round];
 const playerList = () => G.order.map(id => G.players[id]);
 const total = p => p.pts + p.cards.length * QUIZ.points.card;
 
+// Printed-card mode: wait for the next card (typed on the pad, or scanned on this device).
+function nextCard() {
+  if (G.round + 1 >= G.rounds) return endGame();
+  G.phase = "draw"; ui.pad = ""; ui.msg = "";
+  save(); broadcast(); render();
+}
+
+function useCard(n) {
+  if (!G || G.phase !== "draw") return;
+  const s = cardSong(n);
+  if (!s) { ui.msg = "Kort " + n + " finns inte."; ui.pad = ""; render(); return; }
+  if (G.songs.some(x => x.n === s.n)) { ui.msg = "Kort " + n + " har redan spelats. Dra ett nytt kort."; ui.pad = ""; render(); return; }
+  G.songs.push(s);
+  startRound();
+}
+
+function checkScan() {
+  const sc = JSON.parse(localStorage.getItem("quizzuh-scan") || "null");
+  if (!sc || Date.now() - sc.at > 10 * 60e3) return;
+  localStorage.removeItem("quizzuh-scan");
+  if (G && G.phase === "draw") useCard(sc.n);
+}
+
 function startRound() {
+  if (G.mode === "cards" && G.songs.length < G.round + 2) return nextCard();
   G.round++;
   if (G.round >= G.songs.length) return endGame();
   G.phase = "song";
@@ -125,7 +151,7 @@ function onMessage(c, m) {
 
 function viewFor(id) {
   const p = G.players[id];
-  const v = { phase: G.phase, round: G.round + 1, total: G.songs.length, name: p.name, cards: p.cards,
+  const v = { phase: G.phase, round: G.round + 1, total: G.rounds || G.songs.length, name: p.name, cards: p.cards,
               answered: !!p.answer, first: p.cards.length === 0, pts: p.pts, points: QUIZ.points };
   if (G.phase === "song") v.remaining = Math.max(0, G.deadline - Date.now());
   if (G.phase === "reveal") { const s = song(); v.song = { artist: s.artist, title: songLabel(s), year: s.year, star: s.star }; v.mine = p.last; }
@@ -178,9 +204,12 @@ function render() {
         <h1 class="logo">Quizzuh</h1>
         <p class="tag">Gissa låten. Bygg din tidslinje.</p>
         <div class="panel">
-          <label>Antal låtar <input type="number" min="2" max="${yearsAvailable()}" value="${esc(ui.songs)}" data-set="songs"></label>
+          <div class="modes"><button class="${ui.mode === "random" ? "on" : ""}" data-act="mode" data-mode="random">Slumpade låtar</button>
+            <button class="${ui.mode === "cards" ? "on" : ""}" data-act="mode" data-mode="cards">Tryckta kort</button></div>
+          <div class="hint">${ui.mode === "cards" ? "Dra ett kort i taget ur leken och skriv in kortets nummer (eller skanna det med den här enheten)." : "Spelet slumpar låtar ur listan, aldrig två från samma år."}</div>
+          <label>Antal ${ui.mode === "cards" ? "kort" : "låtar"} <input type="number" min="2" max="${ui.mode === "cards" ? usable().length : yearsAvailable()}" value="${esc(ui.songs)}" data-set="songs"></label>
           <label>Sekunder per låt <input type="number" min="10" max="180" value="${esc(ui.secs)}" data-set="secs"></label>
-          <div class="hint">${usable().length} låtar från ${yearsAvailable()} olika år. Aldrig två låtar från samma år i ett spel.</div>
+          <div class="hint">${usable().length} låtar från ${yearsAvailable()} olika år.</div>
           ${musicBox()}
           <button class="big" data-act="new">Skapa spel</button>
           ${resume ? `<button class="ghost" data-act="resume">Fortsätt spelet (${esc(saved.code)})</button>` : ""}
@@ -200,18 +229,30 @@ function render() {
           <p class="big-text">Skanna koden med mobilen för att vara med!</p>
           <p class="code">Kod: <b>${esc(G.code)}</b></p>
           <div class="chips">${chips}</div>
-          <p class="hint">${G.songs.length} låtar · ${G.secs} sekunder per låt</p>
+          <p class="hint">${G.rounds} ${G.mode === "cards" ? "kort" : "låtar"} · ${G.secs} sekunder per låt</p>
           ${musicBox()}
           <button class="big" data-act="start" ${players.length ? "" : "disabled"}>Starta</button>
           <button class="ghost small" data-act="quit">Avbryt spelet</button>
         </div>
+      </div>${msg}`;
+  } else if (G.phase === "draw") {
+    const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button data-act="key" data-k="${k}">${k}</button>`).join("");
+    $app.innerHTML = `
+      <div class="hub-song">
+        <p class="round">Kort ${G.round + 2} av ${G.rounds}</p>
+        <p class="big-text">Dra ett kort och skriv kortets nummer</p>
+        <div class="padnum">${esc(ui.pad) || "&nbsp;"}</div>
+        <div class="pad">${keys}<button data-act="key" data-k="del">⌫</button><button data-act="key" data-k="0">0</button><button class="go" data-act="key" data-k="ok">✓</button></div>
+        <p class="hint">Eller skanna kortet med kameran på den här enheten. Kortet hamnar då här automatiskt.</p>
+        <div class="chips">${chips}</div>
+        <button class="ghost small" data-act="finish">Avsluta spelet och visa resultatet</button>
       </div>${msg}`;
   } else if (G.phase === "song") {
     const left = timeLeft();
     const done = players.filter(p => p.answer).length;
     $app.innerHTML = `
       <div class="hub-song">
-        <p class="round">Låt ${G.round + 1} av ${G.songs.length}</p>
+        <p class="round">Låt ${G.round + 1} av ${G.rounds}</p>
         <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
         <div class="timer"><div style="width:${(left / G.secs) * 100}%"></div></div>
         <p class="big-text">${left} s</p>
@@ -229,12 +270,12 @@ function render() {
     }).join("");
     $app.innerHTML = `
       <div class="hub-reveal">
-        <p class="round">Låt ${G.round + 1} av ${G.songs.length}</p>
+        <p class="round">Låt ${G.round + 1} av ${G.rounds}</p>
         <div class="card-big"><div class="year">${s.year}</div><div class="title">${esc(songLabel(s))}</div><div class="artist">${esc(s.artist)}</div></div>
         ${s.star ? `<p class="hint">* Den här inspelningen kanske inte är originalet.</p>` : ""}
         <table><tr><th></th><th>Artist (${P.artist})</th><th>Låt (${P.title})</th><th>År (${P.year})</th><th>Placering</th><th>Poäng</th><th>Totalt</th></tr>${rows}</table>
         <p class="hint">Totalt = poäng + ${P.card} per kort på tidslinjen.</p>
-        <button class="big" data-act="next">${G.round + 1 < G.songs.length ? "Nästa låt" : "Se resultatet"}</button>
+        <button class="big" data-act="next">${G.round + 1 < G.rounds ? (G.mode === "cards" ? "Nästa kort" : "Nästa låt") : "Se resultatet"}</button>
       </div>${msg}`;
   } else if (G.phase === "end") {
     const list = standings().map((p, i) => `<li><span class="place">${i + 1}</span> ${esc(p.name)} <b>${total(p)}</b>
@@ -253,15 +294,35 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const a = b.dataset.act;
   if (a === "new") newGame();
-  else if (a === "resume") { G = JSON.parse(localStorage.getItem(SAVE)); playerList().forEach(p => p.online = false); connect(); render(); }
+  else if (a === "resume") { G = JSON.parse(localStorage.getItem(SAVE)); G.rounds = G.rounds || G.songs.length; playerList().forEach(p => p.online = false); connect(); render(); }
   else if (a === "start") startRound();
   else if (a === "reveal") reveal();
   else if (a === "replay") playSong();
   else if (a === "next") startRound();
   else if (a === "again" || a === "quit") { if (a === "quit" && !confirm("Avbryta spelet?")) return; localStorage.removeItem(SAVE); if (peer) peer.destroy(); peer = null; G = null; render(); }
   else if (a === "spotify") Spotify.login();
+  else if (a === "mode") { ui.mode = b.dataset.mode; localStorage.setItem("quizzuh-mode", ui.mode); render(); }
+  else if (a === "key") padKey(b.dataset.k);
+  else if (a === "finish") { if (confirm("Avsluta spelet och visa resultatet?")) endGame(); }
   else if (a === "devices") loadDevices();
 });
+function padKey(k) {
+  if (k === "del") ui.pad = ui.pad.slice(0, -1);
+  else if (k === "ok") { if (ui.pad) useCard(Number(ui.pad)); return; }
+  else if (ui.pad.length < 3) ui.pad += k;
+  render();
+}
+document.addEventListener("keydown", e => {
+  if (!G || G.phase !== "draw" || e.target.tagName === "INPUT") return;
+  if (/^[0-9]$/.test(e.key)) padKey(e.key);
+  else if (e.key === "Backspace") padKey("del");
+  else if (e.key === "Enter") padKey("ok");
+});
+// A card scanned with this device's camera (k.html in another tab) lands here.
+window.addEventListener("storage", e => { if (e.key === "quizzuh-scan" && e.newValue) checkScan(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkScan(); });
+window.addEventListener("focus", checkScan);
+
 document.addEventListener("change", e => {
   const t = e.target;
   if (t.dataset.set) ui[t.dataset.set] = t.value;
@@ -281,7 +342,7 @@ setInterval(() => {
 }, 250);
 
 (async () => {
-  await Spotify.init();
+  if (await Spotify.init()) return;
   render();
   if (Spotify.loggedIn()) loadDevices();
 })();

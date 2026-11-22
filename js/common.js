@@ -68,9 +68,15 @@ function titleOk(guess, song, need) {
 }
 
 // slot = where the new card goes in the sorted timeline (0 = before the first card).
+// A card from the same year as its neighbour counts as right on either side.
 function placementOk(cards, slot, year) {
   const before = cards[slot - 1], after = cards[slot];
-  return (!before || before.year < year) && (!after || after.year > year);
+  return (!before || before.year <= year) && (!after || after.year >= year);
+}
+
+// Printed cards: the card number is the song's `n`.
+function cardSong(n) {
+  return (window.SONGS || []).find(s => s.n === Number(n) && s.year) || null;
 }
 
 // ---------- small helpers ----------

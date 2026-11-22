@@ -78,6 +78,8 @@ function render() {
 
   if (v.phase === "closed") {
     $app.innerHTML = `<div class="phone"><h1 class="logo">Quizzuh</h1><p>Spelet har redan börjat. Vänta till nästa spel!</p></div>`;
+  } else if (v.phase === "draw") {
+    $app.innerHTML = `<div class="phone">${head}<h2>Nästa kort dras…</h2><p>Gör dig redo!</p>${timeline(v.cards, false)}${st}</div>`;
   } else if (v.phase === "lobby") {
     $app.innerHTML = `<div class="phone">${head}<h2>Hej ${esc(v.name)}!</h2><p>Du är med. Väntar på att spelet startar…</p>${st}</div>`;
   } else if (v.phase === "song" && !v.answered) {

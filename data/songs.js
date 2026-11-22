@@ -36,9 +36,9 @@ window.SONGS = [
 "title": "West End Girls",
 "year": 1985,
 "star": false,
-"note": "The hit version is from 1985 (it reached no. 1 in 1986). An earlier, different recording came out in 1984 and flopped.",
+"note": "The 1985 hit recording. (A different, little-known recording came out in 1984.)",
 "spotify_id": "2Di0qFNb7ATroCGB3q0Ka7",
-"check": "check"
+"check": "sure"
 },
 {
 "n": 5,
@@ -105,10 +105,10 @@ window.SONGS = [
 "artist": "Rockwell",
 "title": "Somebody's Watching Me",
 "year": 1983,
-"star": true,
-"note": "Spotify shows 2023: this copy is on a \"Sped Up\" release. The original single came out on 27 December 1983. Listen to check this is the normal speed.",
-"spotify_id": "2QN9zL3SzXdGqqmXO68gFp",
-"check": "fixed + listen"
+"star": false,
+"note": "Album version from the original 1984 album (single came out 27 Dec 1983); the sped-up release copy is no longer used.",
+"spotify_id": "7jwQlYGpOml9ETGre1HqGA",
+"check": "fixed"
 },
 {
 "n": 12,
@@ -202,13 +202,13 @@ window.SONGS = [
 },
 {
 "n": 21,
-"artist": "DNA & Suzanne Vega",
+"artist": "Suzanne Vega",
 "title": "Tom's Diner",
-"year": 1990,
+"year": 1987,
 "star": false,
-"note": "This is the DNA remix, released in 1990. Suzanne Vega's original a cappella song is from 1987.",
-"spotify_id": "4sutLmjkVKRN6pOAMo2joC",
-"check": "decide"
+"note": "Original: Suzanne Vega's a cappella version from Solitude Standing (1987), used instead of the 1990 DNA remix on the playlist.",
+"spotify_id": "6OKUhXuJMvoVPde9fMJJzy",
+"check": "fixed"
 },
 {
 "n": 22,
@@ -456,9 +456,9 @@ window.SONGS = [
 "title": "Forget Her",
 "year": 2004,
 "star": false,
-"note": "Recorded in 1994 for the album Grace but left off it. It was first released in 2004 on the Legacy Edition. Spotify shows 1994.",
+"note": "Recorded in 1994 for Grace but first released in 2004 (Legacy Edition). No earlier version exists, so 2004 is the original release.",
 "spotify_id": "6UuVONmxXwTKN1ISepuAoQ",
-"check": "decide"
+"check": "sure"
 },
 {
 "n": 47,
@@ -585,10 +585,10 @@ window.SONGS = [
 "artist": "Ray Charles",
 "title": "Hit the Road Jack",
 "year": 1961,
-"star": true,
-"note": "Spotify shows 2021 (a compilation). The original is from 1961. Listen to check this is the original recording.",
-"spotify_id": "22PjDmIT2S8upSueZN300S",
-"check": "fixed + listen"
+"star": false,
+"note": "Spotify only has this on later compilations; this copy (Ray Charles' most-played) is the length of the 1961 original single.",
+"spotify_id": "28oWUQCEDG6sK0HTev979v",
+"check": "likely"
 },
 {
 "n": 60,
@@ -666,7 +666,7 @@ window.SONGS = [
 "title": "Ain't Nobody Else Like You",
 "year": null,
 "star": false,
-"note": "Spotify shows 1973, the year of a best-of album. The original is from Cass Elliot's solo years, 1968–71; I couldn't find the exact year. Check it, or drop the song.",
+"note": "No year found (Cass Elliot solo years 1968–71). Left out of the game and the cards.",
 "spotify_id": "7l5BTHQXkTQxZjc9HyoN3h",
 "check": "unknown"
 },
@@ -695,10 +695,10 @@ window.SONGS = [
 "artist": "Bonnie Tyler",
 "title": "Total Eclipse of the Heart",
 "year": 1983,
-"star": true,
-"note": "Spotify shows 2009 (a best-of album). The original is from 1983. Listen to check this isn't a re-recording.",
-"spotify_id": "7wuJGgpTNzbUyn26IOY6rj",
-"check": "fixed + listen"
+"star": false,
+"note": "Original album version from Faster Than the Speed of Night (1983), used instead of the 2009 best-of copy.",
+"spotify_id": "1VrfLrBviw9A6JzRoo3t2C",
+"check": "fixed"
 },
 {
 "n": 71,
@@ -714,11 +714,11 @@ window.SONGS = [
 "n": 72,
 "artist": "Fleetwood Mac",
 "title": "Silver Springs",
-"year": 1997,
+"year": 1976,
 "star": false,
-"note": "This is the 1997 live version (from The Dance), which was the hit. The studio original came out in 1976 as a B-side.",
-"spotify_id": "1QEzs30PUAJJPbHL1e4NYH",
-"check": "decide"
+"note": "Original studio version (B-side of Go Your Own Way, Dec 1976), from Rumours Super Deluxe; used instead of the 1997 live version on the playlist.",
+"spotify_id": "4nZi6XNe36Ut4Nij3IQ1yC",
+"check": "fixed"
 },
 {
 "n": 73,
@@ -878,6 +878,116 @@ window.SONGS = [
 "star": false,
 "note": "",
 "spotify_id": "2IvetNzSZMH5gwjInoyr18",
+"check": "sure"
+},
+{
+"n": 89,
+"artist": "Simon Lindén",
+"title": "Crossfire",
+"year": 2026,
+"star": false,
+"note": "Spotify's date is the only source.",
+"spotify_id": "2XTzUnmj61NLEMzzisS2sf",
+"check": "likely"
+},
+{
+"n": 90,
+"artist": "The Cranberries",
+"title": "Zombie",
+"year": 1994,
+"star": false,
+"note": "2025 remaster of the 1994 original.",
+"spotify_id": "3gjHnylel3PTRpjS44ocqr",
+"check": "sure"
+},
+{
+"n": 91,
+"artist": "Aerosmith",
+"title": "Dream On",
+"year": 1973,
+"star": false,
+"note": "",
+"spotify_id": "5Ih9gbqyxCzTJ43nuSuKnC",
+"check": "sure"
+},
+{
+"n": 92,
+"artist": "Bon Jovi",
+"title": "You Give Love A Bad Name",
+"year": 1986,
+"star": false,
+"note": "",
+"spotify_id": "0rmGAIH9LNJewFw7nKzZnc",
+"check": "sure"
+},
+{
+"n": 93,
+"artist": "Elvis Presley",
+"title": "Can't Help Falling in Love",
+"year": 1961,
+"star": false,
+"note": "",
+"spotify_id": "44AyOl4qVkzS48vBsbNXaC",
+"check": "sure"
+},
+{
+"n": 94,
+"artist": "Avril Lavigne",
+"title": "Sk8er Boi",
+"year": 2002,
+"star": false,
+"note": "",
+"spotify_id": "00Mb3DuaIH1kjrwOku9CGU",
+"check": "sure"
+},
+{
+"n": 95,
+"artist": "Elton John",
+"title": "I'm Still Standing",
+"year": 1983,
+"star": false,
+"note": "",
+"spotify_id": "1jDJFeK9x3OZboIAHsY9k2",
+"check": "sure"
+},
+{
+"n": 96,
+"artist": "The Police",
+"title": "Every Breath You Take",
+"year": 1983,
+"star": false,
+"note": "2003 remaster of the 1983 original.",
+"spotify_id": "1JSTJqkT5qHq8MDJnJbRE1",
+"check": "sure"
+},
+{
+"n": 97,
+"artist": "Linkin Park",
+"title": "In the End",
+"year": 2000,
+"star": false,
+"note": "On Hybrid Theory (2000); the single came out in 2001.",
+"spotify_id": "60a0Rd6pjrkxjPbaKzXjfq",
+"check": "sure"
+},
+{
+"n": 98,
+"artist": "Tate McRae",
+"title": "Housewife",
+"year": 2026,
+"star": false,
+"note": "Spotify's date is the only source.",
+"spotify_id": "2sFepQNyl1WjpROruP8bJ0",
+"check": "likely"
+},
+{
+"n": 99,
+"artist": "Led Zeppelin",
+"title": "Stairway to Heaven",
+"year": 1971,
+"star": false,
+"note": "Remaster of the 1971 original.",
+"spotify_id": "5CQ30WqJwcep0pYcV4AMNc",
 "check": "sure"
 }
 ];

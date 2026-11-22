@@ -18,7 +18,9 @@ do the git steps for him, never ask him to use the terminal.
 - `data/songs.json` = the checked list (field `year` = year for the game, `spotify_year`, `check`, `note`, `star`).
 - Year rule: the year the version you hear first came out. Remasters / best-ofs keep the original year;
   remixes and live versions get their own year.
-- `star: true` = not yet confirmed as the original recording: the game shows " *" after the title.
+- `star: true` = not yet confirmed as the original recording: the game shows " *" after the title (none left since 2026-11-22).
+- Simon wants ORIGINALS: where the playlist has a remix/live/odd copy, `spotify_id` points at the original recording and
+  `orig_playlist_id` keeps the playlist's copy (so a playlist re-check doesn't treat it as new).
 - `check` values: sure, fixed, likely, fixed + listen, decide/check (Simon's call), unknown (no year: leave out of games).
 - Updating: read the playlist from the embed page (`tools/spotify_tracks.py`), check only new songs
   (`tools/musicbrainz_years.py`, then by hand with Wikipedia), keep Simon's earlier decisions,
@@ -34,3 +36,15 @@ do the git steps for him, never ask him to use the terminal.
 - `js/spotify.js` = Spotify login (PKCE, no secret) + play on a chosen device (needs Premium).
 - `data/songs.js` is made from `data/songs.json` by `tools/make_songs_js.py`: re-run it after changing the list.
 - Testing: silent (headless, `--mute-audio`). Local PeerJS server: `require("peer").PeerServer({port: 9000, path: "/", host: "127.0.0.1"})`.
+
+## Printed cards (2026-11-22, for 1 December)
+- Card number = song `n` (stable; never renumber, new songs get new numbers). Songs without a year get no card.
+- `k.html?c=<n>` = what a card's QR opens (`js/card.js`): if this device has a hub game in card mode waiting for a card
+  (`G.mode === "cards"`, phase "draw"), it hands the card over via localStorage `quizzuh-scan`; otherwise it plays the
+  song on Spotify with the answer hidden ("Visa svaret" reveals it).
+- Hub modes: "Slumpade låtar" (random, no repeated years) and "Tryckta kort" (`G.mode = "cards"`, phase "draw" = number pad,
+  `useCard(n)`, `G.rounds`, no repeats). Same-year cards count as right on either side (`placementOk`).
+- Spotify login always redirects to the folder URL (registered) and jumps back to the page that asked (`quizzuh-spotify-return`).
+- `node tools/make_cards.js [previewDir] [pages…]` -> `cards/quizzuh-cards.pdf` (80 mm cards, 6 per A4, fronts and mirrored backs
+  interleaved for long-edge duplex, crop marks, rules card last). Needs Playwright: `NODE_PATH=$(npm root -g)`. Fonts in `tools/cards/fonts`.
+  Re-run after any song change, and re-check that long titles fit (it prints TEXT TOO LONG).
