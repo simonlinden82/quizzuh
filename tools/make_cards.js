@@ -103,11 +103,12 @@ body { font-family: Inter, sans-serif; color: #1a0f1f; -webkit-print-color-adjus
 .card { width: 100%; height: 100%; padding: 2.5mm; }
 .frame { width: 100%; height: 100%; border: .4mm solid #e7d6dd; border-radius: 3.5mm; display: flex; flex-direction: column; align-items: center; padding: 3mm 2.5mm; }
 .brand { height: 5.2mm; width: auto; display: block; }
-.qr { width: 27mm; height: 27mm; margin: auto 0 2.5mm; }
+.front .brand { margin-top: 2mm; }
+.qr { width: 27mm; height: 27mm; margin: auto 0 2.2mm; }
 .qr svg { width: 100%; height: 100%; display: block; }
 .num { font-size: 3.9mm; font-weight: 700; color: #1a0f1f; }
 .num b { font-weight: 900; color: #E8304A; }
-.tagline { margin-top: auto; font-size: 1.8mm; color: #9a8592; letter-spacing: .15mm; text-transform: uppercase; white-space: nowrap; }
+.tagline { margin-top: 3mm; font-size: 1.8mm; color: #9a8592; letter-spacing: .15mm; text-transform: uppercase; white-space: nowrap; }
 .panel { width: 100%; height: 100%; border-radius: 3.5mm; color: #fff4ec; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4mm 2.8mm; position: relative; }
 .artist { font-weight: 700; font-size: 3.5mm; line-height: 1.15; max-height: 13mm; overflow: hidden; width: 100%; }
 .year { font-family: Archivo; font-size: 11.5mm; line-height: 1.05; margin: 3mm 0; letter-spacing: -.3mm; white-space: nowrap; width: 100%; overflow: hidden; }
