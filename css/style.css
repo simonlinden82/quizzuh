@@ -103,3 +103,10 @@ button.wide { display: block; width: 100%; margin: 1.2rem 0; padding: 1rem; }
 .modes { display: flex; gap: .6rem; margin: .4rem 0 .2rem; }
 .modes button { flex: 1; border: 2px solid #5a3c60; background: transparent; }
 .modes button.on { background: #3b2541; border-color: var(--gold); }
+/* logo */
+.logo-img { margin: 0; line-height: 0; }
+.logo-img img { height: 3.4rem; width: auto; }
+.hub-start .logo-img img { height: 5.5rem; }
+.hub-lobby .logo-img img { height: 4rem; }
+.phone .logo-img { text-align: center; margin: 1.5rem 0 1rem; }
+.phone .logo-img img { height: 3rem; }

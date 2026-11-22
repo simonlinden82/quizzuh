@@ -30,7 +30,7 @@ async function loadDevices() {
 
 function render() {
   const msg = st.msg ? `<div class="msg">${esc(st.msg)}</div>` : "";
-  const head = `<h1 class="logo">Quizzuh</h1><p class="cardnum">Kort ${esc(num || "?")}</p>`;
+  const head = `<h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1><p class="cardnum">Kort ${esc(num || "?")}</p>`;
   if (!song) { $app.innerHTML = `<div class="phone">${head}<p>Det här kortet finns inte i listan.</p></div>`; return; }
   if (st.sent) {
     $app.innerHTML = `<div class="phone">${head}<h2>Kortet är skickat till spelet!</h2>

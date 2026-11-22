@@ -45,6 +45,9 @@ do the git steps for him, never ask him to use the terminal.
 - Hub modes: "Slumpade låtar" (random, no repeated years) and "Tryckta kort" (`G.mode = "cards"`, phase "draw" = number pad,
   `useCard(n)`, `G.rounds`, no repeats). Same-year cards count as right on either side (`placementOk`).
 - Spotify login always redirects to the folder URL (registered) and jumps back to the page that asked (`quizzuh-spotify-return`).
-- `node tools/make_cards.js [previewDir] [pages…]` -> `cards/quizzuh-cards.pdf` (80 mm cards, 6 per A4, fronts and mirrored backs
+- `node tools/make_cards.js [previewDir] [pages…]` -> `cards/quizzuh-cards.pdf` (65 mm cards, 12 per A4 (3 x 4; designed at 80 mm and scaled), fronts and mirrored backs
   interleaved for long-edge duplex, crop marks, rules card last). Needs Playwright: `NODE_PATH=$(npm root -g)`. Fonts in `tools/cards/fonts`.
   Re-run after any song change, and re-check that long titles fit (it prints TEXT TOO LONG).
+- Logo (2026-11-22): `assets/logo-light.svg` (light backgrounds), `assets/logo-dark.svg` (white ring, dark backgrounds),
+  `assets/logo-icon.svg` (tab icon). The Q is a record with a handle (record + magnifying glass); letters are Archivo Black
+  converted to outlines (no font needed). Web pages use `.logo-img`.

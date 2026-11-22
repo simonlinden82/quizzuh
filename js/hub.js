@@ -201,7 +201,7 @@ function render() {
     const resume = saved && saved.phase !== "end" && Date.now() - saved.startedAt < 12 * 3600e3;
     $app.innerHTML = `
       <div class="hub-start">
-        <h1 class="logo">Quizzuh</h1>
+        <h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1>
         <p class="tag">Gissa låten. Bygg din tidslinje.</p>
         <div class="panel">
           <div class="modes"><button class="${ui.mode === "random" ? "on" : ""}" data-act="mode" data-mode="random">Slumpade låtar</button>
@@ -225,7 +225,7 @@ function render() {
       <div class="hub-lobby">
         <div class="qr">${qrSvg(joinUrl())}</div>
         <div class="side">
-          <h1 class="logo">Quizzuh</h1>
+          <h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1>
           <p class="big-text">Skanna koden med mobilen för att vara med!</p>
           <p class="code">Kod: <b>${esc(G.code)}</b></p>
           <div class="chips">${chips}</div>

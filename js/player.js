@@ -61,23 +61,23 @@ function timeline(cards, pickable) {
 function render() {
   const st = status ? `<div class="msg">${esc(status)}</div>` : "";
   if (!code) {
-    $app.innerHTML = `<div class="phone"><h1 class="logo">Quizzuh</h1>
+    $app.innerHTML = `<div class="phone"><h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1>
       <label>Spelkod <input id="code" maxlength="4" autocapitalize="characters" placeholder="ABCD"></label>
       <button class="big" data-act="code">Fortsätt</button></div>`;
     return;
   }
   if (!joined && !(name && conn)) {
-    $app.innerHTML = `<div class="phone"><h1 class="logo">Quizzuh</h1>
+    $app.innerHTML = `<div class="phone"><h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1>
       <label>Ditt namn <input id="name" maxlength="20" value="${esc(name)}" placeholder="Namn" autocomplete="nickname"></label>
       <button class="big" data-act="join">Gå med</button>${st}</div>`;
     return;
   }
-  if (!view) { $app.innerHTML = `<div class="phone"><h1 class="logo">Quizzuh</h1><p>Ansluter…</p>${st}</div>`; return; }
+  if (!view) { $app.innerHTML = `<div class="phone"><h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1><p>Ansluter…</p>${st}</div>`; return; }
   const v = view;
   const head = `<div class="phead"><span>${esc(v.name || name)}</span><span>${v.round > 0 && v.phase !== "lobby" ? "Låt " + v.round + "/" + v.total : ""}</span></div>`;
 
   if (v.phase === "closed") {
-    $app.innerHTML = `<div class="phone"><h1 class="logo">Quizzuh</h1><p>Spelet har redan börjat. Vänta till nästa spel!</p></div>`;
+    $app.innerHTML = `<div class="phone"><h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1><p>Spelet har redan börjat. Vänta till nästa spel!</p></div>`;
   } else if (v.phase === "draw") {
     $app.innerHTML = `<div class="phone">${head}<h2>Nästa kort dras…</h2><p>Gör dig redo!</p>${timeline(v.cards, false)}${st}</div>`;
   } else if (v.phase === "lobby") {
