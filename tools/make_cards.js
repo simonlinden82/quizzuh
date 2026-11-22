@@ -105,7 +105,8 @@ body { font-family: Inter, sans-serif; color: #1a0f1f; -webkit-print-color-adjus
 .brand { height: 5.2mm; width: auto; display: block; }
 .front .frame { padding-bottom: 2.2mm; }
 .front .brand { margin-top: 2mm; }
-.qr { width: 27mm; height: 27mm; margin: auto 0 2.2mm; }
+.qr { width: 27mm; height: 27mm; margin: auto 0 2.2mm; position: relative; top: 1.3mm; }
+.front .num { position: relative; top: 1.3mm; }
 .qr svg { width: 100%; height: 100%; display: block; }
 .num { font-size: 3.9mm; font-weight: 700; color: #1a0f1f; }
 .num b { font-weight: 900; color: #E8304A; }
