@@ -5,6 +5,7 @@
 const Spotify = (() => {
   const KEY = "quizzuh-spotify";
   const DEV = "quizzuh-device";
+  const ASLEEP = "Spotify-appen har somnat. Öppna Spotify en kort stund och kom tillbaka hit.";
   const redirect = () => new URL("./", location.href).href;
   const clientId = () => (window.QUIZ && QUIZ.spotifyClientId) || "";
   let tok = JSON.parse(localStorage.getItem(KEY) || "null");
@@ -72,8 +73,11 @@ const Spotify = (() => {
     if (r.status === 401) { tok = null; localStorage.removeItem(KEY); }
     if (!r.ok) {
       let msg = txt; try { msg = JSON.parse(txt).error.message; } catch (e) {}
-      if (/no active device/i.test(msg || "")) msg = "Ingen Spotify-enhet hittades. Öppna Spotify-appen, spela något i en sekund och försök igen.";
-      throw new Error(msg || "Spotify-fel " + r.status);
+      const noDevice = r.status === 404 || /device/i.test(msg || "");
+      if (noDevice) msg = ASLEEP;
+      const err = new Error(msg || "Spotify-fel " + r.status);
+      err.status = r.status; err.noDevice = noDevice;
+      throw err;
     }
     return txt ? JSON.parse(txt) : null;
   }
@@ -90,6 +94,42 @@ const Spotify = (() => {
     return { list, id: d ? d.id : "" };
   }
 
+  // Play a track, trying hard to find somewhere to play it. An iPhone's Spotify app that sits in the background
+  // often drops off Spotify's device list even though it can still play, so after the chosen device we try:
+  // a fresh device list, the last device that worked (even if unlisted), "wherever Spotify last played", and
+  // once more after a short wait. Returns the device id that worked ("" = Spotify's own choice).
+  // Throws an error with .noDevice = true when nothing answers (the app needs waking up).
+  async function playAnywhere(trackId, wanted) {
+    const body = { uris: ["spotify:track:" + trackId] };
+    const tried = new Set();
+    let last = null;
+    const attempt = async id => {
+      if (tried.has(id)) return false;
+      tried.add(id);
+      try { await api("PUT", "/me/player/play" + (id ? "?device_id=" + encodeURIComponent(id) : ""), body); return true; }
+      catch (e) {
+        if (!e.noDevice && !(e.status >= 500)) throw e;   // a real problem (login, Premium): stop here
+        last = e; return false;
+      }
+    };
+    const fromList = async () => { const p = await pickDevice(); return p.id; };
+    const done = id => { if (id) localStorage.setItem(DEV, id); return id; };
+
+    if (wanted && await attempt(wanted)) return done(wanted);
+    let id = await fromList();
+    if (id && await attempt(id)) return done(id);
+    const saved = localStorage.getItem(DEV);
+    if (saved && await attempt(saved)) return done(saved);
+    if (await attempt("")) return "";
+    await new Promise(r => setTimeout(r, 1500));
+    tried.clear();
+    id = await fromList();
+    if (id && await attempt(id)) return done(id);
+    const err = last || new Error(ASLEEP);
+    err.noDevice = true; err.message = ASLEEP;
+    throw err;
+  }
+
   return {
     configured: () => !!clientId(),
     loggedIn: () => !!tok,
@@ -97,9 +137,7 @@ const Spotify = (() => {
     logout() { tok = null; localStorage.removeItem(KEY); },
     savedDevice: () => localStorage.getItem(DEV) || "",
     saveDevice: id => localStorage.setItem(DEV, id),
-    play(trackId, deviceId) {
-      return api("PUT", "/me/player/play" + (deviceId ? "?device_id=" + encodeURIComponent(deviceId) : ""), { uris: ["spotify:track:" + trackId] });
-    },
+    play: playAnywhere,
     pause(deviceId) { return api("PUT", "/me/player/pause" + (deviceId ? "?device_id=" + encodeURIComponent(deviceId) : "")).catch(() => {}); },
   };
 })();

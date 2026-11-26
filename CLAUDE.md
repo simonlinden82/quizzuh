@@ -51,3 +51,16 @@ do the git steps for him, never ask him to use the terminal.
 - Logo (2026-11-22): `assets/logo-light.svg` (light backgrounds), `assets/logo-dark.svg` (white ring, dark backgrounds),
   `assets/logo-icon.svg` (tab icon). The Q is a record with a straight tonearm (pivot, arm, head with the needle on the grooves); letters are Archivo Black
   converted to outlines (no font needed). Web pages use `.logo-img`.
+
+## Phone card page as an app (2026-11-26)
+- `k.html` with no `?c=` = start screen ("Dra ett kort"). Next card without leaving the page: "Skanna QR" (in-page camera,
+  `js/scanner.js` + `vendor/jsQR.js`, loaded on first use) or "Skriv kortets nummer" (number pad). `loadCard(n)` swaps the
+  card in place (URL updated with replaceState). The hub's draw screen has the same "Skanna QR" button.
+- Why: scanning with the iPhone camera app opened a new Safari page each time, and by then the Spotify app had often
+  dropped off Spotify's device list ("Ingen Spotify-enhet hittades").
+- `Spotify.play` (= `playAnywhere`) tries: chosen device, fresh device list, last device that worked (even if unlisted),
+  no device id, then again after 1.5 s. If nothing answers it throws `noDevice`: the card page shows "Öppna Spotify"
+  (link `spotify://`) and plays automatically when the page becomes visible again.
+- Home screen: `manifest.webmanifest` (start_url k.html, only linked from k.html so the hub isn't affected),
+  `assets/icon-180.png` (apple-touch-icon), 192/512 PNGs. Icon = logo-icon.svg on cream #fff4ec (dark/orange backgrounds hid parts).
+  A home-screen app on iOS has its own storage: log in to Spotify once more inside it.

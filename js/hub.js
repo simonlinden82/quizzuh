@@ -164,8 +164,8 @@ function broadcast() { Object.keys(conns).forEach(send); }
 // ---------- music ----------
 async function playSong() {
   if (!Spotify.loggedIn()) return;
-  try { await Spotify.play(song().spotify_id, ui.device || undefined); ui.msg = ""; }
-  catch (e) { ui.msg = "Spotify: " + e.message + ". Öppna Spotify-appen och välj enhet."; }
+  try { const d = await Spotify.play(song().spotify_id, ui.device || undefined); if (d) ui.device = d; ui.msg = ""; }
+  catch (e) { ui.msg = "Spotify: " + e.message + (e.noDevice ? " Tryck sedan Spela igen." : ""); }
   render();
 }
 async function loadDevices() {
@@ -206,7 +206,7 @@ function render() {
         <div class="panel">
           <div class="modes"><button class="${ui.mode === "random" ? "on" : ""}" data-act="mode" data-mode="random">Slumpade låtar</button>
             <button class="${ui.mode === "cards" ? "on" : ""}" data-act="mode" data-mode="cards">Tryckta kort</button></div>
-          <div class="hint">${ui.mode === "cards" ? "Dra ett kort i taget ur leken och skriv in kortets nummer (eller skanna det med den här enheten)." : "Spelet slumpar låtar ur listan, aldrig två från samma år."}</div>
+          <div class="hint">${ui.mode === "cards" ? "Dra ett kort i taget ur leken och skanna QR-koden eller skriv in kortets nummer." : "Spelet slumpar låtar ur listan, aldrig två från samma år."}</div>
           <label>Antal ${ui.mode === "cards" ? "kort" : "låtar"} <input type="number" min="2" max="${ui.mode === "cards" ? usable().length : yearsAvailable()}" value="${esc(ui.songs)}" data-set="songs"></label>
           <label>Sekunder per låt <input type="number" min="10" max="180" value="${esc(ui.secs)}" data-set="secs"></label>
           <div class="hint">${usable().length} låtar från ${yearsAvailable()} olika år.</div>
@@ -240,10 +240,10 @@ function render() {
     $app.innerHTML = `
       <div class="hub-song">
         <p class="round">Kort ${G.round + 2} av ${G.rounds}</p>
-        <p class="big-text">Dra ett kort och skriv kortets nummer</p>
+        <p class="big-text">Dra ett kort: skanna QR-koden eller skriv numret</p>
+        ${Scanner.supported() ? `<button class="big scan-btn" data-act="scan">Skanna QR</button>` : ""}
         <div class="padnum">${esc(ui.pad) || "&nbsp;"}</div>
         <div class="pad">${keys}<button data-act="key" data-k="del">⌫</button><button data-act="key" data-k="0">0</button><button class="go" data-act="key" data-k="ok">✓</button></div>
-        <p class="hint">Eller skanna kortet med kameran på den här enheten. Kortet hamnar då här automatiskt.</p>
         <div class="chips">${chips}</div>
         <button class="ghost small" data-act="finish">Avsluta spelet och visa resultatet</button>
       </div>${msg}`;
@@ -303,6 +303,7 @@ document.addEventListener("click", e => {
   else if (a === "spotify") Spotify.login();
   else if (a === "mode") { ui.mode = b.dataset.mode; localStorage.setItem("quizzuh-mode", ui.mode); render(); }
   else if (a === "key") padKey(b.dataset.k);
+  else if (a === "scan") Scanner.open(useCard);
   else if (a === "finish") { if (confirm("Avsluta spelet och visa resultatet?")) endGame(); }
   else if (a === "devices") loadDevices();
 });
