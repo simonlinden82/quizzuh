@@ -46,7 +46,7 @@ do the git steps for him, never ask him to use the terminal.
   `useCard(n)`, `G.rounds`, no repeats). Same-year cards count as right on either side (`placementOk`).
 - Spotify login always redirects to the folder URL (registered) and jumps back to the page that asked (`quizzuh-spotify-return`).
 - `node tools/make_cards.js [previewDir] [pages…]` -> `cards/quizzuh-cards.pdf` (mini European cards 44 x 68 mm, 16 per A4 (4 x 4), fronts and mirrored backs
-  interleaved for long-edge duplex, crop marks, two rules cards last: 3 steps per side). Needs Playwright: `NODE_PATH=$(npm root -g)`. Fonts in `tools/cards/fonts`.
+  interleaved for long-edge duplex, crop marks, rules cards last: 3 steps per side). Needs Playwright: `NODE_PATH=$(npm root -g)`. Fonts in `tools/cards/fonts`.
   Re-run after any song change, and re-check that long titles fit (it prints TEXT TOO LONG).
 - Logo (2026-11-22): `assets/logo-light.svg` (light backgrounds), `assets/logo-dark.svg` (white ring, dark backgrounds),
   `assets/logo-icon.svg` (tab icon). The Q is a record with a straight tonearm (pivot, arm, head with the needle on the grooves); letters are Archivo Black
@@ -71,3 +71,12 @@ do the git steps for him, never ask him to use the terminal.
 - Pausa v2 (2026-11-26, Simon: pausing still let Spotify sleep after ~10 s): `hush()` = POST /me/player/next (skip to the
   queued silence, like a song ending), else start silence. card.js `pause()` then checks GET /me/player after 1.5 s,
   restarts silence once if not playing, and shows the result under the buttons ("Spotify spelar tystnad…" / "stannade ändå").
+
+## Rules cards (2026-11-26, Simon's text, written in the Claude Doc "Quizzuh – spelregler på korten")
+- Three rules cards: "Kortspelet" (Kort + en mobil), "Skärmspelet" (Dator/iPad + en mobil var), "Tips". `RULES` in
+  make_cards.js = [name, subtitle, first step, steps, hint]; font 2.45 mm. The builder prints "RULES TOO LONG" /
+  "rules ok … px free" per side; trims needed to fit were laid back into the doc as suggestions.
+- Kortspelet scoring (Simon's choice): no points; place right = keep the card; 2+ right guesses (artist/song/year) = bonus card
+  placed year up; first to 10 cards on the timeline wins.
+- On this Mac: Node is at ~/.local/node/bin (not on PATH), Playwright installed globally; Playwright's own browser build
+  may be missing, so make_cards.js falls back to the installed Google Chrome. `SCALE=3` env = sharp PNG previews.

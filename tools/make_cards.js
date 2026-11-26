@@ -47,26 +47,39 @@ const back = s => { const [bg, yc] = deco(s.year); return `<div class="card back
   </div></div>`; };
 
 // Rules: two cards, each side has three steps.
+// Rules cards (Simon's text, 2026-11-26): [name, subtitle, first step number, steps, "turn over" hint]; front + back per card.
 const RULES = [
-  ["Bara korten", 1, ["En telefon är DJ. Skanna ett kort och logga in på Spotify första gången.",
+  ["Kortspelet", "Kort + en mobil", 1, [
+    "En mobil med Spotify Premium spelar låtarna. Skanna ett kort med kameran och logga in på Spotify första gången.",
     "Alla får ett kort med årtalet uppåt: början på tidslinjen.",
-    "Turvis: dra ett kort och skanna det. Låten spelas, svaret syns inte."], "Vänd kortet"],
-  ["Bara korten", 4, ["Säg artist (2 p), låt (1 p) och gärna exakt år (1 p).",
-    "Lägg kortet på din tidslinje och vänd det. Rätt plats: behåll det. Fel: kortet åker ut.",
-    "Vid slutet ger varje kort på tidslinjen 1 p. Flest poäng vinner."], ""],
-  ["Med webbsidan", 1, ["Öppna <b>simonlinden82.<wbr>github.io/<wbr>quizzuh</b> på dator eller iPad.",
-    "Välj <b>Tryckta kort</b> och <b>Skapa spel</b>.",
-    "Alla skannar QR-koden på skärmen med mobilen."], "Vänd kortet"],
-  ["Med webbsidan", 4, ["Dra ett kort och skriv in numret på skärmen (eller skanna kortet med iPaden).",
-    "Alla svarar och lägger kortet på sin tidslinje i mobilen.",
+    "Aina börjar, sedan går turen medsols. Dra ett kort och tryck <b>Skanna QR</b> eller skriv numret. Svaret är dolt."], "Vänd kortet"],
+  ["Kortspelet", "Kort + en mobil", 4, [
+    "Lägg kortet på din tidslinje och gissa högt: artist, låt och exakt år.",
+    "Vänd kortet. Rätt plats: behåll det. Fel: kortet åker ut. Om minst två av gissningarna är rätt får du ett bonuskort från högen som läggs med årtalet uppåt på rätt plats.",
+    "Spelet är slut när någon har 10 kort på sin tidslinje."], ""],
+  ["Skärmspelet", "Dator/iPad + en mobil var", 1, [
+    "Öppna <b>simonlinden82.<wbr>github.io/<wbr>quizzuh</b> på dator eller iPad och logga in på Spotify (Premium). Välj under <b>Spela på</b> var musiken ska höras (t.ex. en mobil).",
+    "Välj <b>Slumpade låtar</b> eller <b>Tryckta kort</b> och <b>Skapa spel</b>.",
+    "Alla skannar QR-koden på skärmen."], "Vänd kortet"],
+  ["Skärmspelet", "Dator/iPad + en mobil var", 4, [
+    "Tryck <b>Starta</b>. Låten spelas direkt. (Tryckta kort: dra ett kort och skanna det eller skriv numret.)",
+    "Alla svarar och lägger låten på sin tidslinje i mobilen.",
     "Skärmen visar svaret och räknar poängen."], ""],
+  ["Tips", "", 1, [
+    "Öppna Spotify-appen en gång innan ni börjar.",
+    "Tryck <b>Pausa</b> på sidan, inte i Spotify-appen: då förblir kopplingen till Spotify aktiv.",
+    "Står det att Spotify har somnat: tryck <b>Öppna Spotify</b> och kom tillbaka."], "Vänd kortet"],
+  ["Tips", "", 4, [
+    "Lägg sidan på hemskärmen (iPhone: Dela → Lägg till på hemskärmen) så öppnas den i helskärm.",
+    "Samma år på två kort? Båda platserna räknas som rätt.",
+    "Går QR-koden inte att skanna? Skriv numret som står på kortet."], ""],
 ];
-const rules = ([h, start, items, more]) => `<div class="card rules"><div class="frame">${LOGO}<h3>${h}</h3>
-  <ol start="${start}">${items.map(i => `<li>${i}</li>`).join("")}</ol>${more ? `<div class="more">${more} ›</div>` : ""}</div></div>`;
+const rules = ([h, sub, start, items, more]) => `<div class="card rules"><div class="frame">${LOGO}<h3>${h}</h3>${sub ? `<p class="sub">${sub}</p>` : ""}
+  <ol class="steps" start="${start}">${items.map(i => `<li>${i}</li>`).join("")}</ol>${more ? `<div class="more">${more} ›</div>` : ""}</div></div>`;
 
 // Each slot: [frontHtml, backHtml]
 const slots = songs.map(s => [front(s), back(s)]);
-slots.push([rules(RULES[0]), rules(RULES[1])], [rules(RULES[2]), rules(RULES[3])]);
+for (let i = 0; i < RULES.length; i += 2) slots.push([rules(RULES[i]), rules(RULES[i + 1])]);
 const per = COLS * ROWS;
 let pages = "";
 for (let p = 0; p < slots.length; p += per) {
@@ -118,9 +131,11 @@ body { font-family: Inter, sans-serif; color: #1a0f1f; -webkit-print-color-adjus
 .small { position: absolute; bottom: 2mm; right: 2.6mm; font-size: 1.8mm; opacity: .7; }
 .rules .frame { align-items: stretch; padding: 3mm 2.8mm; }
 .rules .brand { height: 4.4mm; margin: 0 auto; }
-.rules h3 { font-size: 3.2mm; font-weight: 900; color: #E8304A; margin: 2mm 0 1.5mm; text-align: center; }
-.rules ol { font-size: 2.7mm; line-height: 1.22; padding-left: 3.8mm; }
-.rules li { margin-bottom: 1.3mm; }
+.rules h3 { font-size: 3.2mm; font-weight: 900; color: #E8304A; margin: 2mm 0 0; text-align: center; }
+.rules .sub { font-size: 2.2mm; font-weight: 700; color: #9a8592; text-align: center; margin: .4mm 0 0; }
+.rules ol { margin-top: 1.5mm; }
+.rules ol { font-size: 2.45mm; line-height: 1.2; padding-left: 3.6mm; }
+.rules li { margin-bottom: 1.1mm; }
 .rules .more { margin-top: auto; text-align: right; font-size: 2.2mm; font-weight: 700; color: #9a8592; }
 </style></head><body>${pages}
 <script>
@@ -137,8 +152,9 @@ document.fonts.ready.then(() => {
 (async () => {
   const tmp = path.join(__dirname, "cards", "_deck.html");
   fs.writeFileSync(tmp, html);
-  const br = await chromium.launch();
-  const pg = await br.newPage();
+  // Playwright's own browser, or the installed Google Chrome if that one isn't downloaded.
+  const br = await chromium.launch().catch(() => chromium.launch({ channel: "chrome" }));
+  const pg = await br.newPage({ deviceScaleFactor: Number(process.env.SCALE || 1) });   // SCALE=3 for sharp previews
   await pg.goto("file://" + tmp);
   await pg.waitForSelector("body[data-ready='1']");
   fs.mkdirSync(path.join(ROOT, "cards"), { recursive: true });
@@ -147,6 +163,8 @@ document.fonts.ready.then(() => {
   // Warn about text that still doesn't fit after shrinking.
   const tight = await pg.$$eval(".fit", els => els.filter(el => el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1).map(el => el.textContent));
   if (tight.length) console.log("TEXT TOO LONG:", tight);
+  const over = await pg.$$eval(".rules .frame", els => els.map(el => ({ t: el.querySelector("h3").textContent + " " + el.querySelector("ol").getAttribute("start"), over: el.scrollHeight - el.clientHeight, free: el.clientHeight - [...el.children].reduce((a, c) => a + c.offsetHeight, 0) })));
+  over.forEach(o => console.log(o.over > 0 ? "RULES TOO LONG:" : "rules ok:", o.t, o.over > 0 ? "(" + o.over + " px over)" : "(" + o.free + " px free)"));
   if (process.argv[2]) {   // optional: PNG previews; pages listed after the folder (1-based), default 1 2
     await pg.setViewportSize({ width: 794, height: 1123 });
     const secs = await pg.$$("section.page");
@@ -155,5 +173,5 @@ document.fonts.ready.then(() => {
   }
   await br.close();
   fs.unlinkSync(tmp);
-  console.log("wrote", out, songs.length, "song cards + 2 rules cards,", Math.ceil(slots.length / per) * 2, "pages");
+  console.log("wrote", out, songs.length, "song cards +", RULES.length / 2, "rules cards,", Math.ceil(slots.length / per) * 2, "pages");
 })();
