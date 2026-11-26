@@ -155,7 +155,15 @@ const Spotify = (() => {
     savedDevice: () => localStorage.getItem(DEV) || "",
     saveDevice: id => localStorage.setItem(DEV, id),
     play: playAnywhere,
-    hush: wanted => playUris(silentHour(), wanted),   // "pause" that keeps the phone's Spotify awake
+    // "Pause" that keeps the phone's Spotify awake: skip ahead to the silence queued after the song (the same thing
+    // that happens when a song ends), or start silence if that fails. Never a real pause.
+    async hush(wanted) {
+      const q = wanted ? "?device_id=" + encodeURIComponent(wanted) : "";
+      try { await api("POST", "/me/player/next" + q); }
+      catch (e) { await playUris(silentHour(), wanted); }
+    },
+    startSilence: wanted => playUris(silentHour(), wanted),
+    state: () => api("GET", "/me/player"),   // { is_playing, item: { name }, device: { name } } or null
     pause(deviceId) { return api("PUT", "/me/player/pause" + (deviceId ? "?device_id=" + encodeURIComponent(deviceId) : "")).catch(() => {}); },
   };
 })();

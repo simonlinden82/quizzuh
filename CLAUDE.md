@@ -68,3 +68,6 @@ do the git steps for him, never ask him to use the terminal.
   device list ~5 s after it stops playing in the background. So `Spotify.play` queues an hour of silent tracks after the
   song (`SILENCE` in spotify.js, measured silent, playable in SE) and the card page's "Pausa" calls `Spotify.hush()`
   (plays silence) instead of pausing. Errors show a small tech line (`err.detail`: device-id prefix:status, lista:<count>).
+- Pausa v2 (2026-11-26, Simon: pausing still let Spotify sleep after ~10 s): `hush()` = POST /me/player/next (skip to the
+  queued silence, like a song ending), else start silence. card.js `pause()` then checks GET /me/player after 1.5 s,
+  restarts silence once if not playing, and shows the result under the buttons ("Spotify spelar tystnad…" / "stannade ändå").

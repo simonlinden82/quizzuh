@@ -21,7 +21,7 @@ function loadCard(n) {
   if (!s) { st.msg = "Kort " + n + " finns inte."; st.pad = null; render(); return; }
   num = n; song = s;
   history.replaceState(null, "", location.pathname + "?c=" + n);
-  st.pad = null; st.show = false; st.playing = false; st.msg = ""; st.asleep = false;
+  st.pad = null; st.show = false; st.playing = false; st.paused = false; st.msg = ""; st.asleep = false;
   if (hubWaiting()) { handToHub(); return; }
   render();
   if (Spotify.loggedIn()) play();
@@ -34,12 +34,29 @@ function handToHub() {
 
 async function play() {
   if (!song) return;
-  st.busy = true; st.msg = ""; st.detail = ""; st.asleep = false; render();
+  st.busy = true; st.msg = ""; st.detail = ""; st.asleep = false; st.paused = false; render();
   try {
     st.device = await Spotify.play(song.spotify_id, st.device || undefined);
     st.playing = true;
   } catch (e) { st.msg = e.message; st.asleep = !!e.noDevice; st.detail = e.detail || (e.status ? "svar:" + e.status : ""); }
   st.busy = false; render();
+}
+
+// "Pausa" never really pauses (the phone's Spotify would fall asleep): it skips to the silence queued after the song.
+// Then it checks that Spotify is still playing, starts the silence again if not, and says what it found.
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function pause() {
+  st.playing = false; st.paused = true; st.pauseNote = "Pausar…"; render();
+  const dev = st.device || undefined;
+  const check = async () => { await wait(1500); const p = await Spotify.state(); return p && p.is_playing ? p : null; };
+  try {
+    await Spotify.hush(dev);
+    let p = await check();
+    if (!p) { await Spotify.startSilence(dev); p = await check(); }
+    st.pauseNote = p ? "Spotify spelar tystnad och håller sig vaken."
+                     : "Spotify stannade ändå. Tryck Spela när nästa kort är draget.";
+  } catch (e) { st.pauseNote = "Pausa gick inte: " + e.message + " " + (e.detail || e.status || ""); }
+  render();
 }
 
 async function loadDevices() {
@@ -97,9 +114,10 @@ function render() {
     : `<button class="ghost wide" data-act="show">Visa svaret</button>`;
   $app.innerHTML = `<div class="phone">${head}<p class="cardnum">Kort ${esc(num)}</p>
     <div class="eq ${st.playing ? "" : "still"}"><i></i><i></i><i></i><i></i><i></i></div>
-    <p class="big-text center">${st.busy ? "Startar…" : st.playing ? "Låten spelas" : "Redo"}</p>
+    <p class="big-text center">${st.busy ? "Startar…" : st.playing ? "Låten spelas" : st.paused ? "Pausad" : "Redo"}</p>
     <div class="row center"><button class="ghost" data-act="play">${st.playing ? "Spela igen" : "Spela"}</button>
       <button class="ghost" data-act="pause">Pausa</button></div>
+    ${st.paused && st.pauseNote ? `<p class="hint center">${esc(st.pauseNote)}</p>` : ""}
     ${msg}
     ${answer}
     ${nextButtons()}
@@ -120,7 +138,7 @@ document.addEventListener("click", e => {
   if (a === "login") Spotify.login();
   else if (a === "play") play();
   // "Pausa" plays silence instead of stopping, so the phone's Spotify stays awake for the next card.
-  else if (a === "pause") { st.playing = false; render(); Spotify.hush(st.device || undefined).catch(() => Spotify.pause(st.device)); }
+  else if (a === "pause") pause();
   else if (a === "show") { st.show = true; render(); }
   else if (a === "devices") loadDevices();
   else if (a === "scan") Scanner.open(loadCard);
