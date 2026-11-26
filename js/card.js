@@ -34,11 +34,11 @@ function handToHub() {
 
 async function play() {
   if (!song) return;
-  st.busy = true; st.msg = ""; st.asleep = false; render();
+  st.busy = true; st.msg = ""; st.detail = ""; st.asleep = false; render();
   try {
     st.device = await Spotify.play(song.spotify_id, st.device || undefined);
     st.playing = true;
-  } catch (e) { st.msg = e.message; st.asleep = !!e.noDevice; }
+  } catch (e) { st.msg = e.message; st.asleep = !!e.noDevice; st.detail = e.detail || (e.status ? "svar:" + e.status : ""); }
   st.busy = false; render();
 }
 
@@ -58,7 +58,8 @@ function render() {
   const head = `<h1 class="logo-img"><img src="assets/logo-dark.svg" alt="Quizzuh"></h1>`;
   const msg = st.msg ? `<div class="msg">${esc(st.msg)}${st.asleep
     ? `<a class="button wide" href="spotify://" data-act="wake">Öppna Spotify</a>
-       <span class="hint">Kom sedan tillbaka hit, så startar låten av sig själv.</span>` : ""}</div>` : "";
+       <span class="hint">Kom sedan tillbaka hit, så startar låten av sig själv.</span>` : ""}${st.detail
+    ? `<span class="hint tech">${esc(st.detail)}</span>` : ""}</div>` : "";
 
   if (st.pad !== null) {
     const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button data-act="key" data-k="${k}">${k}</button>`).join("");
@@ -118,7 +119,8 @@ document.addEventListener("click", e => {
   const a = b.dataset.act;
   if (a === "login") Spotify.login();
   else if (a === "play") play();
-  else if (a === "pause") { Spotify.pause(st.device); st.playing = false; render(); }
+  // "Pausa" plays silence instead of stopping, so the phone's Spotify stays awake for the next card.
+  else if (a === "pause") { st.playing = false; render(); Spotify.hush(st.device || undefined).catch(() => Spotify.pause(st.device)); }
   else if (a === "show") { st.show = true; render(); }
   else if (a === "devices") loadDevices();
   else if (a === "scan") Scanner.open(loadCard);

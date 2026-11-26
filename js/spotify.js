@@ -99,20 +99,37 @@ const Spotify = (() => {
   // a fresh device list, the last device that worked (even if unlisted), "wherever Spotify last played", and
   // once more after a short wait. Returns the device id that worked ("" = Spotify's own choice).
   // Throws an error with .noDevice = true when nothing answers (the app needs waking up).
+  //
+  // Keeping the phone awake: on an iPhone, Spotify drops off the device list a few seconds after it STOPS playing
+  // while it is in the background, and a web page cannot wake it. So it never stops: after the song comes an hour of
+  // silent tracks, and hush() (the page's "Pausa") switches to silence instead of pausing.
+  // Both tracks measured as silent (digital zero / below -80 dB) on 2026-11-26, playable in Sweden.
+  const SILENCE = ["spotify:track:6gWSdJ0JS8hPUrKDUrgEwj", "spotify:track:3mkOlbSv5RYadx0JsjTrKq"];  // 10 min each
+  const silentHour = () => Array.from({ length: 6 }, (_, i) => SILENCE[i % 2]);
+
   async function playAnywhere(trackId, wanted) {
-    const body = { uris: ["spotify:track:" + trackId] };
+    return playUris(["spotify:track:" + trackId, ...silentHour()], wanted, ["spotify:track:" + trackId]);
+  }
+
+  async function playUris(uris, wanted, plain) {
+    let body = { uris };
     const tried = new Set();
+    const log = [];
     let last = null;
     const attempt = async id => {
       if (tried.has(id)) return false;
       tried.add(id);
-      try { await api("PUT", "/me/player/play" + (id ? "?device_id=" + encodeURIComponent(id) : ""), body); return true; }
+      const path = "/me/player/play" + (id ? "?device_id=" + encodeURIComponent(id) : "");
+      try { await api("PUT", path, body); log.push((id ? id.slice(0, 4) : "auto") + ":ok"); return true; }
       catch (e) {
+        log.push((id ? id.slice(0, 4) : "auto") + ":" + (e.status || "?"));
+        // A silent track that has vanished from Spotify must not stop the song: try the song on its own.
+        if (e.status === 400 && plain && body.uris !== plain) { body = { uris: plain }; tried.delete(id); return attempt(id); }
         if (!e.noDevice && !(e.status >= 500)) throw e;   // a real problem (login, Premium): stop here
         last = e; return false;
       }
     };
-    const fromList = async () => { const p = await pickDevice(); return p.id; };
+    const fromList = async () => { const p = await pickDevice(); log.push("lista:" + p.list.length); return p.id; };
     const done = id => { if (id) localStorage.setItem(DEV, id); return id; };
 
     if (wanted && await attempt(wanted)) return done(wanted);
@@ -126,7 +143,7 @@ const Spotify = (() => {
     id = await fromList();
     if (id && await attempt(id)) return done(id);
     const err = last || new Error(ASLEEP);
-    err.noDevice = true; err.message = ASLEEP;
+    err.noDevice = true; err.message = ASLEEP; err.detail = log.join(" ");
     throw err;
   }
 
@@ -138,6 +155,7 @@ const Spotify = (() => {
     savedDevice: () => localStorage.getItem(DEV) || "",
     saveDevice: id => localStorage.setItem(DEV, id),
     play: playAnywhere,
+    hush: wanted => playUris(silentHour(), wanted),   // "pause" that keeps the phone's Spotify awake
     pause(deviceId) { return api("PUT", "/me/player/pause" + (deviceId ? "?device_id=" + encodeURIComponent(deviceId) : "")).catch(() => {}); },
   };
 })();

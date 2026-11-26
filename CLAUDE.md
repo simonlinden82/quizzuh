@@ -64,3 +64,7 @@ do the git steps for him, never ask him to use the terminal.
 - Home screen: `manifest.webmanifest` (start_url k.html, only linked from k.html so the hub isn't affected),
   `assets/icon-180.png` (apple-touch-icon), 192/512 PNGs. Icon = logo-icon.svg on cream #fff4ec (dark/orange backgrounds hid parts).
   A home-screen app on iOS has its own storage: log in to Spotify once more inside it.
+- Keep-awake (2026-11-26, after "Spotify-appen har somnat" kept showing on Simon's iPhone): iOS Spotify drops off the
+  device list ~5 s after it stops playing in the background. So `Spotify.play` queues an hour of silent tracks after the
+  song (`SILENCE` in spotify.js, measured silent, playable in SE) and the card page's "Pausa" calls `Spotify.hush()`
+  (plays silence) instead of pausing. Errors show a small tech line (`err.detail`: device-id prefix:status, lista:<count>).
